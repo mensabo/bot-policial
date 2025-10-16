@@ -14,8 +14,8 @@ logging.basicConfig(
 )
 
 # --- Leemos las claves secretas desde las Variables de Entorno ---
-TOKEN_TELEGRAM = os.getenv("8473255373:AAHfu9LYdnKocu56NZsJYjHW-oUbdGdBlm0") # Usaremos una variable diferente para no confundirnos
-GEMINI_API_KEY = os.getenv("AIzaSyCow6L8wxlPoP0ywkvpaB-LwBKJxx0zdCU")
+TOKEN_TELEGRAM = os.getenv("TOKEN_TELEGRAM_PERSONAL") 
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 
 # --- Configuración de la API de Google ---
@@ -25,8 +25,7 @@ if GEMINI_API_KEY:
 
 # --- Lista Blanca de Usuarios Autorizados ---
 # ¡IMPORTANTE! Pon aquí tu ID y el ID de Yaiza.
-# Pídele a Yaiza que use @RawDataBot para obtener su ID.
-USUARIOS_AUTORIZADOS = [5055449,123456789] 
+USUARIOS_AUTORIZADOS = [5055449, 1234567890] 
 
 
 # --- Función para dividir mensajes largos ---
@@ -52,7 +51,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"¡Hola, {nombre_usuario}! Estoy aquí para ayudaros en lo que necesitéis. 😊"
     )
 
-# --- Función principal de respuesta con IA ---
+# --- Función principal de respuesta con IA (VERSIÓN CON ESTÉTICA MEJORADA) ---
 async def responder_con_gemini(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     if user_id not in USUARIOS_AUTORIZADOS:
@@ -67,15 +66,20 @@ async def responder_con_gemini(update: Update, context: ContextTypes.DEFAULT_TYP
     try:
         model = genai.GenerativeModel('gemini-2.5-pro') # O el modelo que te funcione
         
-        # --- ¡¡EL NUEVO PROMPT PERSONAL!! ---
+        # --- ¡¡PROMPT CON REGLAS DE ESTILO DETALLADAS!! ---
         prompt_mejorado = (
             "Eres un asistente de IA amable, creativo, servicial y muy capaz. Estás en un chat privado con Yaiza y Diego. "
             "Tu objetivo es ayudar a Yaiza con sus proyectos, responder a sus dudas generales y facilitar cualquier tarea que necesiten. "
             "Dirígete a ellos de forma cercana y positiva.\n\n"
-            "Formatea tus respuestas de manera clara y estructurada usando HTML:\n"
-            "- Usa <b>títulos en negrita</b> para las ideas principales.\n"
-            "- Usa <i>texto en cursiva</i> para notas o ejemplos.\n"
-            "- Para listas o pasos, usa el emoji del círculo azul (🔵).\n\n"
+            
+            "Aplica el siguiente formato HTML estrictamente para que tus respuestas sean visualmente atractivas:\n"
+            "- Usa <b>títulos en negrita</b> para las ideas principales o secciones.\n"
+            "- Usa <u>texto subrayado</u> para resaltar palabras o conceptos muy importantes.\n"
+            "- Para listas o pasos, usa el emoji de la chispa (✨) seguido de un espacio.\n"
+            "- Usa <i>texto en cursiva</i> para notas, ejemplos o comentarios adicionales.\n"
+            "- Usa saltos de línea para estructurar bien la información.\n"
+            "- NO uses ninguna otra etiqueta HTML aparte de <b>, <i>, y <u>.\n\n"
+            
             "La consulta es:\n"
             f'"{texto_usuario}"'
         )
@@ -97,7 +101,6 @@ async def responder_con_gemini(update: Update, context: ContextTypes.DEFAULT_TYP
         
     except Exception as e:
         logging.error(f"Error al procesar la respuesta: {e}")
-        # ... (manejo de errores sin cambios)
         if "Can't parse entities" in str(e):
             logging.warning("Error de formato HTML. Enviando como texto plano.")
             trozos_sin_formato = dividir_mensaje(texto_respuesta_gemini)
@@ -117,7 +120,7 @@ def main():
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, responder_con_gemini))
     
-    print("Bot personal para Yaiza y Diego iniciado.")
+    print("Bot personal para Yaiza y Diego (v. Estilo Mejorado) iniciado.")
     application.run_polling()
 
 if __name__ == '__main__':
